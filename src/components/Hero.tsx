@@ -13,8 +13,10 @@ export const Hero = () => {
 
             <label htmlFor="my_modal_7" className="btn btn-primary  mt-2 font-bold pl-12 pr-12 bg-[#41ff54] btn text-black">Get Started
             </label>
-
+            
             <button className="btn btn-primary  mt-2 font-bold ml-[30px] pl-12 pr-12 bg-[#41ff54]">Get Started</button>
+            
+           
           </div>
         </div>
       </div>

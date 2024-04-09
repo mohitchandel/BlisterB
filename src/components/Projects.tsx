@@ -266,7 +266,7 @@ export const Projects = () => {
       </div>
 
       {/* <modal!!!> */}
-      
+
       <input type="checkbox" id="my_modal_7" className="modal-toggle" />
       <div className="modal" role="dialog">
         <div className="modal-box">
