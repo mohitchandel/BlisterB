@@ -1,8 +1,8 @@
-export const Projects =()=>{
-    return(
-        <>
+export const Projects = () => {
+  return (
+    <>
 
-<div className="grid grid-cols-4  gap-4">
+      <div className="grid grid-cols-4  gap-4">
         <div>
           <div className="card w-96 bg-base-100 shadow-xl">
             <figure><img src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg" alt="Shoes" /></figure>
@@ -31,8 +31,8 @@ export const Projects =()=>{
               {/* The button to open modal */}
               <label htmlFor="my_modal_7" className="btn text-black bg-white">Contribute</label>
               <div className="text-center">
-              <a className="link link-info text-[#41ff54]">view Paper</a>
-            </div>
+                <a className="link link-info text-[#41ff54]">view Paper</a>
+              </div>
             </div>
           </div></div>
 
@@ -265,39 +265,47 @@ export const Projects =()=>{
         </div>
       </div>
 
+      {/* <modal!!!> */}
+      
       <input type="checkbox" id="my_modal_7" className="modal-toggle" />
       <div className="modal" role="dialog">
         <div className="modal-box">
           <h3 className="text-lg font-bold">Hello!</h3>
-          <label className="input input-bordered flex items-center gap-2">
-            Name
-            <input type="text" className="grow" placeholder="Daisy" />
+          <label className=" my-2 input input-bordered flex items-center gap-2">
+            Input Image
+            <input type="file" className="grow" placeholder="file" />
           </label>
-         <button className="btn btn-primary bg-white my-6">click me!</button>
+          <label className=" my-4 input input-bordered flex items-center gap-2">
+            file input
+            <input type="file" className="grow" placeholder="file" />
+          </label>
+          <div className="mt-6">Title
+          </div>
+          <div className="mt-6">
+            Description
+          </div>
+          <button className="btn btn-primary  my-6 bg-[#41ff54]">Click me!</button>
         </div>
-
         <label className="modal-backdrop" htmlFor="my_modal_7">Close</label>
       </div>
-        </>
-    )
-    
-    
+    </>
+  )
 }
 
 
 
 const UpArrowIcon = () => {
-    return (
-      <>
-        <svg width={32} fill="#000000" viewBox="0 0 24 24" id="up-arrow-circle" data-name="Flat Color" xmlns="http://www.w3.org/2000/svg" className="icon flat-color"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><circle id="primary" cx="12" cy="12" r="10" style={{ fill: "#41ff54" }}></circle><path id="secondary" d="M14.83,9.5,12.69,6.38a.82.82,0,0,0-1.38,0L9.17,9.5A1,1,0,0,0,9.86,11H11v6a1,1,0,0,0,2,0V11h1.14A1,1,0,0,0,14.83,9.5Z" style={{ fill: "#ffffff" }}></path></g></svg>
-      </>
-    )
-  }
-  
-  const DownArrowIcon = () => {
-    return (
-      <>
-        <svg width={32} fill="#000000" viewBox="0 0 24 24" id="down-arrow-circle" data-name="Flat Color" xmlns="http://www.w3.org/2000/svg" className="icon flat-color"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><circle id="primary" cx="12" cy="12" r="10" style={{ fill: "#41ff54" }}></circle><path id="secondary" d="M14.14,13H13V7a1,1,0,0,0-2,0v6H9.86a1,1,0,0,0-.69,1.5l2.14,3.12a.82.82,0,0,0,1.38,0l2.14-3.12A1,1,0,0,0,14.14,13Z" style={{ fill: "#ffffff" }}></path></g></svg>
-      </>
-    )
-  }
+  return (
+    <>
+      <svg width={32} fill="#000000" viewBox="0 0 24 24" id="up-arrow-circle" data-name="Flat Color" xmlns="http://www.w3.org/2000/svg" className="icon flat-color"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><circle id="primary" cx="12" cy="12" r="10" style={{ fill: "#41ff54" }}></circle><path id="secondary" d="M14.83,9.5,12.69,6.38a.82.82,0,0,0-1.38,0L9.17,9.5A1,1,0,0,0,9.86,11H11v6a1,1,0,0,0,2,0V11h1.14A1,1,0,0,0,14.83,9.5Z" style={{ fill: "#ffffff" }}></path></g></svg>
+    </>
+  )
+}
+
+const DownArrowIcon = () => {
+  return (
+    <>
+      <svg width={32} fill="#000000" viewBox="0 0 24 24" id="down-arrow-circle" data-name="Flat Color" xmlns="http://www.w3.org/2000/svg" className="icon flat-color"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><circle id="primary" cx="12" cy="12" r="10" style={{ fill: "#41ff54" }}></circle><path id="secondary" d="M14.14,13H13V7a1,1,0,0,0-2,0v6H9.86a1,1,0,0,0-.69,1.5l2.14,3.12a.82.82,0,0,0,1.38,0l2.14-3.12A1,1,0,0,0,14.14,13Z" style={{ fill: "#ffffff" }}></path></g></svg>
+    </>
+  )
+}
