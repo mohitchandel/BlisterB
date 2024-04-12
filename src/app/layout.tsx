@@ -15,19 +15,30 @@ import { WagmiProvider } from "wagmi";
 import { mainnet, polygon, optimism, arbitrum, base } from "wagmi/chains";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { Footer } from "@/components/Footer";
+import { Toaster } from "react-hot-toast";
 
 const neonevm = {
-  id: 245022926,
-  name: "Neon EVM Devnet",
-  iconUrl: "https://icons.llamao.fi/icons/chains/rsz_neon.jpg",
-  iconBackground: "#000",
-  nativeCurrency: { name: "Neon", symbol: "NEON", decimals: 18 },
+  id: 245_022_926,
+  name: "Neon EVM DevNet",
+  nativeCurrency: { name: "NEON", symbol: "NEON", decimals: 18 },
   rpcUrls: {
-    default: { http: ["https://devnet.neonevm.org	"] },
+    default: {
+      http: ["https://devnet.neonevm.org"],
+    },
   },
   blockExplorers: {
-    default: { name: "NeonScan", url: "https://neonscan.org/" },
+    default: {
+      name: "Neonscan",
+      url: "https://devnet.neonscan.org",
+    },
   },
+  contracts: {
+    multicall3: {
+      address: "0xca11bde05977b3631167028862be2a173976ca11",
+      blockCreated: 205206112,
+    },
+  },
+  testnet: true,
 } as const satisfies Chain;
 
 const config = getDefaultConfig({
@@ -48,6 +59,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <Toaster position="top-center" reverseOrder={false} />
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
             <RainbowKitProvider

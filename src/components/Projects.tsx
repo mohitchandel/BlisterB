@@ -1,311 +1,181 @@
+"use client";
+import { useEffect, useState } from "react";
+import lighthouse from "@lighthouse-web3/sdk";
+import { publicClient, walletClient } from "@/utils/config";
+import ABI from "@/contract/ABI/abi.json";
+import { useAccount } from "wagmi";
+import toast from "react-hot-toast";
+
+interface Proposal {
+  contributors: string[];
+  creator: string;
+  description: string;
+  id: bigint;
+  imageLink: string;
+  isActive: boolean;
+  title: string;
+  totalFunds: bigint;
+}
+
 export const Projects = () => {
+  const contractAddress = "0xef7db5407d2f2a36e36ff28d336b136f43b8c946";
+
+  const { address, isConnected } = useAccount();
+
+  const [shoeName, setShoeName] = useState<string>();
+  const [shoeDesc, setShoeDesc] = useState<string>();
+  const [shoeImg, setShoeImg] = useState<string>();
+  const [proposals, setProposals] = useState<Proposal[]>([]);
+
+  const progressCallback = (progressData: any) => {
+    let percentageDone =
+      100 - (progressData?.total / progressData?.uploaded)?.toFixed(2);
+    console.log(percentageDone);
+  };
+
+  const uploadFile = async (file: any) => {
+    const output = await lighthouse.upload(
+      file,
+      "e03996c9.c654259790704836b3f2fa4117ee2681",
+      false,
+      null,
+      progressCallback,
+    );
+    setShoeImg(`https://gateway.lighthouse.storage/ipfs/${output.data.Hash}`);
+    console.log("File Status:", output);
+    console.log(
+      "Visit at https://gateway.lighthouse.storage/ipfs/" + output.data.Hash,
+    );
+  };
+
+  const contribute = () => {
+    console.log("contributed");
+  };
+
+  const listSneaker = async () => {
+    if (!isConnected && !address) {
+      toast.error("Please connect wallet first!");
+      return;
+    }
+    if (!shoeName || !shoeDesc || !shoeImg) {
+      toast.error("Please fill all the fields");
+      return;
+    }
+    const { request } = await publicClient.simulateContract({
+      address: contractAddress,
+      abi: ABI,
+      functionName: "createShoeProposal",
+      account: address,
+      args: [shoeName, shoeDesc, shoeImg],
+    });
+    await walletClient.writeContract(request);
+  };
+
+  const getAllProposalsIds = async (): Promise<bigint[]> => {
+    const data: bigint[] = await publicClient.readContract({
+      address: contractAddress,
+      abi: ABI,
+      functionName: "getAllProposalIds",
+    });
+    return data;
+  };
+
+  const getProposalDetails = async (id: bigint): Promise<Proposal> => {
+    const data: Proposal = await publicClient.readContract({
+      address: contractAddress,
+      abi: ABI,
+      functionName: "getProposal",
+      args: [id],
+    });
+    return data;
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const proposalIds = await getAllProposalsIds();
+      const proposalsDetails = await Promise.all(
+        proposalIds.map(async (id) => await getProposalDetails(id)),
+      );
+      setProposals(proposalsDetails);
+    };
+    fetchData();
+  }, []);
+
   return (
     <>
-
-      <div className="grid grid-cols-4  gap-4">
-        <div>
-          <div className="card w-96 bg-base-100 shadow-xl">
-            <figure><img src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg" alt="Shoes" /></figure>
-            <div className="card-body">
-              <h2 className="card-title">
-                title!
-                <div className="badge badge-secondary">NEW</div>
-              </h2>
-              <p>If a dog chews shoes whose shoes does he choose?</p>
-              <div className="grid grid-cols-2">
-                <div className="flex justify-center">
-                  <button className="">
-                    <span >
-                      <UpArrowIcon />12
-                    </span>
-                  </button>
-                </div>
-                <div className="flex justify-center">
-                  <button className="">
-                    <span>
-                      <DownArrowIcon />2
-                    </span>
-                  </button>
-                </div>
-              </div>
-              {/* The button to open modal */}
-              <label htmlFor="my_modal_7" className="btn text-black bg-white">Contribute</label>
-              <div className="text-center">
-                <a className="link link-info text-[#41ff54]">view Paper</a>
-              </div>
-            </div>
-          </div></div>
-
-        {/* <secondcard!!> */}
-        <div> <div className="card w-96 bg-base-100 shadow-xl">
-          <figure><img src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg" alt="Shoes" /></figure>
-          <div className="card-body">
-            <h2 className="card-title">
-              title!
-              <div className="badge badge-secondary">NEW</div>
-            </h2>
-            <p>If a dog chews shoes whose shoes does he choose?</p>
-            <div className="grid grid-cols-2">
-              <div className="flex justify-center">
-                <button className="">
-                  <span >
-                    <UpArrowIcon />18
-                  </span>
-                </button>
-              </div>
-              <div className="flex justify-center">
-                <button className="">
-                  <span>
-                    <DownArrowIcon />7
-                  </span>
+      <div className="container mx-auto mb-10">
+        <div className="grid grid-cols-4 gap-4">
+          {proposals.map((proposal) => (
+            <div key={proposal.id} className="card  bg-base-100 shadow-xl">
+              <figure style={{ height: "300px" }}>
+                {" "}
+                {/* Adjust the height as needed */}
+                <img
+                  src={proposal.imageLink}
+                  alt="Shoes"
+                  style={{ height: "100%", width: "100%", objectFit: "cover" }}
+                />
+              </figure>
+              <div className="card-body">
+                <h2 className="card-title">
+                  {proposal.title}
+                  {proposal.isActive ? (
+                    <div className="badge badge-secondary">Active</div>
+                  ) : (
+                    <div className="badge badge-ghost">Expired</div>
+                  )}
+                </h2>
+                <p>{proposal.description}</p>
+                <button
+                  onClick={contribute}
+                  className="btn bg-black text-white hover:bg-[#41ff54] hover:text-black"
+                >
+                  Contribute
                 </button>
               </div>
             </div>
-            <button className="btn btn-primary bg-white ">Contribute</button>
-            <div className="text-center">
-              <a className="link link-info text-[#41ff54]">view Paper</a>
-            </div>
-          </div>
-        </div></div>
-
-        {/* <thirdcard!!!> */}
-        <div> <div className="card w-96 bg-base-100 shadow-xl">
-          <figure><img src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg" alt="Shoes" /></figure>
-          <div className="card-body">
-            <h2 className="card-title">
-              title!
-              <div className="badge badge-secondary">NEW</div>
-            </h2>
-            <p>If a dog chews shoes whose shoes does he choose?</p>
-            <div className="grid grid-cols-2">
-              <div className="flex justify-center">
-                <button className="">
-                  <span >
-                    <UpArrowIcon />13
-                  </span>
-                </button>
-              </div>
-              <div className="flex justify-center">
-                <button className="">
-                  <span>
-                    <DownArrowIcon />6
-                  </span>
-                </button>
-              </div>
-            </div>
-            <button className="btn btn-primary bg-white ">Contribute</button>
-            <div className="text-center">
-              <a className="link link-info text-[#41ff54]">view Paper</a>
-            </div>
-          </div>
-        </div></div>
-
-        {/* <fourthcard!!!> */}
-        <div> <div className="card w-96 bg-base-100 shadow-xl">
-          <figure><img src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg" alt="Shoes" /></figure>
-          <div className="card-body">
-            <h2 className="card-title">
-              title!
-              <div className="badge badge-secondary">NEW</div>
-            </h2>
-            <p>If a dog chews shoes whose shoes does he choose?</p>
-            <div className="grid grid-cols-2">
-              <div className="flex justify-center">
-                <button className="">
-                  <span >
-                    <UpArrowIcon />14
-                  </span>
-                </button>
-              </div>
-              <div className="flex justify-center">
-                <button className="">
-                  <span>
-                    <DownArrowIcon />7
-                  </span>
-                </button>
-              </div>
-            </div>
-            <button className="btn btn-primary bg-white ">Contribute</button>
-            <div className="text-center">
-              <a className="link link-info text-[#41ff54]">view Paper</a>
-            </div>
-          </div>
-        </div></div>
-
-        {/* <second section!!!!!> */}
-      </div>
-      <div className="grid grid-cols-4 mt-28  gap-4">
-        <div>
-          <div className="card w-96 bg-base-100 shadow-xl">
-            <figure><img src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg" alt="Shoes" /></figure>
-            <div className="card-body">
-              <h2 className="card-title">
-                title!
-                <div className="badge badge-secondary">NEW</div>
-              </h2>
-              <p>If a dog chews shoes whose shoes does he choose?</p>
-              <div className="grid grid-cols-2">
-                <div className="flex justify-center">
-                  <button className="">
-                    <span >
-                      <UpArrowIcon />11
-                    </span>
-                  </button>
-                </div>
-                <div className="flex justify-center">
-                  <button className="">
-                    <span>
-                      <DownArrowIcon />4
-                    </span>
-                  </button>
-                </div>
-              </div>
-              <button className="btn btn-primary bg-white ">Contribute</button>
-              <div className="text-center">
-                <a className="link link-info text-[#41ff54]">view Paper</a>
-              </div>
-            </div>
-          </div></div>
-
-        <div>
-          <div className="card w-96 bg-base-100 shadow-xl">
-            <figure><img src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg" alt="Shoes" /></figure>
-            <div className="card-body">
-              <h2 className="card-title">
-                title!
-                <div className="badge badge-secondary">NEW</div>
-              </h2>
-              <p>If a dog chews shoes whose shoes does he choose?</p>
-              <div className="grid grid-cols-2">
-                <div className="flex justify-center">
-                  <button className="">
-                    <span >
-                      <UpArrowIcon />16
-                    </span>
-                  </button>
-                </div>
-                <div className="flex justify-center">
-                  <button className="">
-                    <span>
-                      <DownArrowIcon />7
-                    </span>
-                  </button>
-                </div>
-              </div>
-              <button className="btn btn-primary bg-white ">Contribute</button>
-              <div className="text-center">
-                <a className="link link-info text-[#41ff54]">view Paper</a>
-              </div>
-            </div>
-          </div></div>
-
-        <div>
-          <div className="card w-96 bg-base-100 shadow-xl">
-            <figure><img src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg" alt="Shoes" /></figure>
-            <div className="card-body">
-              <h2 className="card-title">
-                title!
-                <div className="badge badge-secondary">NEW</div>
-              </h2>
-              <p>If a dog chews shoes whose shoes does he choose?</p>
-              <div className="grid grid-cols-2">
-                <div className="flex justify-center">
-                  <button className="">
-                    <span >
-                      <UpArrowIcon />18
-                    </span>
-                  </button>
-                </div>
-                <div className="flex justify-center">
-                  <button className="">
-                    <span>
-                      <DownArrowIcon />6
-                    </span>
-                  </button>
-                </div>
-              </div>
-              <button className="btn btn-primary bg-white ">Contribute</button>
-              <div className="text-center">
-                <a className="link link-info text-[#41ff54]">view Paper</a>
-              </div>
-            </div>
-          </div></div>
-
-        <div>
-          <div className="card w-96 bg-base-100 shadow-xl">
-            <figure><img src="https://daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.jpg" alt="Shoes" /></figure>
-            <div className="card-body">
-              <h2 className="card-title">
-                title!
-                <div className="badge badge-secondary">NEW</div>
-              </h2>
-              <p>If a dog chews shoes whose shoes does he choose?</p>
-              <div className="grid grid-cols-2">
-                <div className="flex justify-center">
-                  <button className="">
-                    <span >
-                      <UpArrowIcon />19
-                    </span>
-                  </button>
-                </div>
-                <div className="flex justify-center">
-                  <button className="">
-                    <span>
-                      <DownArrowIcon />3
-                    </span>
-                  </button>
-                </div>
-              </div>
-              <button className="btn btn-primary bg-white ">Contribute</button>
-              <div className="text-center">
-                <a className="link link-info text-[#41ff54]">view Paper</a>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
-
-      {/* <modal!!!> */}
 
       <input type="checkbox" id="my_modal_7" className="modal-toggle" />
       <div className="modal" role="dialog">
         <div className="modal-box">
-          <h3 className="text-lg font-bold">Hello!</h3>
-          <label className=" my-2 input input-bordered flex items-center gap-2">
-            Input Image
-            <input type="file" className="grow" placeholder="file" />
-          </label>
-          <label className=" my-4 input input-bordered flex items-center gap-2">
-            file input
-            <input type="file" className="grow" placeholder="file" />
-          </label>
-          <div className="mt-6">Title
+          <h3 className="text-lg font-bold">Create Shoe Design Proposal</h3>
+          <div>
+            <p className="my-2">Shoe Image</p>
+            <input
+              onChange={(e) => uploadFile(e.target.files)}
+              type="file"
+              className="file-input w-full"
+            />
           </div>
-          <div className="mt-6">
-            Description
+          <div>
+            <p className="my-2">Shoe Title</p>
+            <input
+              onChange={(e) => setShoeName(e.target.value)}
+              type="text"
+              placeholder="Title"
+              className="input input-bordered w-full"
+            />
           </div>
-          <button className="btn btn-primary  my-6 bg-[#41ff54]">Click me!</button>
+          <div>
+            <p className="my-2">Shoe Description</p>
+            <input
+              onChange={(e) => setShoeDesc(e.target.value)}
+              type="text"
+              placeholder="Description"
+              className="input input-bordered w-full"
+            />{" "}
+          </div>
+          <button onClick={listSneaker} className="btn my-6 bg-[#41ff54]">
+            Post Proposal
+          </button>
         </div>
-        <label className="modal-backdrop" htmlFor="my_modal_7">Close</label>
+        <label className="modal-backdrop" htmlFor="my_modal_7">
+          Close
+        </label>
       </div>
     </>
-  )
-}
-
-
-
-const UpArrowIcon = () => {
-  return (
-    <>
-      <svg width={32} fill="#000000" viewBox="0 0 24 24" id="up-arrow-circle" data-name="Flat Color" xmlns="http://www.w3.org/2000/svg" className="icon flat-color"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><circle id="primary" cx="12" cy="12" r="10" style={{ fill: "#41ff54" }}></circle><path id="secondary" d="M14.83,9.5,12.69,6.38a.82.82,0,0,0-1.38,0L9.17,9.5A1,1,0,0,0,9.86,11H11v6a1,1,0,0,0,2,0V11h1.14A1,1,0,0,0,14.83,9.5Z" style={{ fill: "#ffffff" }}></path></g></svg>
-    </>
-  )
-}
-
-const DownArrowIcon = () => {
-  return (
-    <>
-      <svg width={32} fill="#000000" viewBox="0 0 24 24" id="down-arrow-circle" data-name="Flat Color" xmlns="http://www.w3.org/2000/svg" className="icon flat-color"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><circle id="primary" cx="12" cy="12" r="10" style={{ fill: "#41ff54" }}></circle><path id="secondary" d="M14.14,13H13V7a1,1,0,0,0-2,0v6H9.86a1,1,0,0,0-.69,1.5l2.14,3.12a.82.82,0,0,0,1.38,0l2.14-3.12A1,1,0,0,0,14.14,13Z" style={{ fill: "#ffffff" }}></path></g></svg>
-    </>
-  )
-}
+  );
+};
