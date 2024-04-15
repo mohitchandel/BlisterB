@@ -5,18 +5,17 @@ export const Hero = () => {
         <div className="hero-content text-center">
           <div className="justify-center">
             <p className="mx-auto w-2/3 text-center font-bold">
-              Hello there
+              Hello there introducing
               <span className="inline-block bg-gradient-to-r from-blue-600 via-green-500 to-indigo-400 bg-clip-text text-transparent">
-                Provident cupiditate
+                BlisterB
               </span>{" "}
-              voluptatem et in. Quaerat
-              <span className="inline-block bg-gradient-to-r from-red-600 via-blue-500 to-indigo-500 bg-clip-text text-transparent">
-                features ut assumenda{" "}
+              List your sneaker Ideas and{" "}
+              <span className="inline-block bg-gradient-to-r from-red-600 via-blue-500 to-indigo-500 bg-clip-text text-transparent py-1">
+                get funded for it{" "}
               </span>
             </p>
             <p className="mt-[30px] text-lg">
-              Create long-running jobs with features like directly in your{" "}
-              <br></br> codebase with features like API integrations, web.
+              A Decentralized Platform for Sneaker Ideas and Funding
             </p>
 
             <label

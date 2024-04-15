@@ -5,6 +5,7 @@ import { publicClient, walletClient } from "@/utils/config";
 import ABI from "@/contract/ABI/abi.json";
 import { useAccount } from "wagmi";
 import toast from "react-hot-toast";
+import { parseEther } from "viem";
 
 interface Proposal {
   contributors: string[];
@@ -29,7 +30,7 @@ export const Projects = () => {
 
   const progressCallback = (progressData: any) => {
     let percentageDone =
-      100 - (progressData?.total / progressData?.uploaded)?.toFixed(2);
+      100 - +(progressData?.total / progressData?.uploaded)?.toFixed(2);
     console.log(percentageDone);
   };
 
@@ -39,17 +40,13 @@ export const Projects = () => {
       "e03996c9.c654259790704836b3f2fa4117ee2681",
       false,
       null,
-      progressCallback,
+      progressCallback
     );
     setShoeImg(`https://gateway.lighthouse.storage/ipfs/${output.data.Hash}`);
     console.log("File Status:", output);
     console.log(
-      "Visit at https://gateway.lighthouse.storage/ipfs/" + output.data.Hash,
+      "Visit at https://gateway.lighthouse.storage/ipfs/" + output.data.Hash
     );
-  };
-
-  const contribute = () => {
-    console.log("contributed");
   };
 
   const listSneaker = async () => {
@@ -71,8 +68,8 @@ export const Projects = () => {
     await walletClient.writeContract(request);
   };
 
-  const getAllProposalsIds = async (): Promise<bigint[]> => {
-    const data: bigint[] = await publicClient.readContract({
+  const getAllProposalsIds = async (): Promise<bigint[] | unknown> => {
+    const data: bigint[] | unknown = await publicClient.readContract({
       address: contractAddress,
       abi: ABI,
       functionName: "getAllProposalIds",
@@ -80,8 +77,10 @@ export const Projects = () => {
     return data;
   };
 
-  const getProposalDetails = async (id: bigint): Promise<Proposal> => {
-    const data: Proposal = await publicClient.readContract({
+  const getProposalDetails = async (
+    id: bigint
+  ): Promise<Proposal | unknown> => {
+    const data: Proposal | unknown = await publicClient.readContract({
       address: contractAddress,
       abi: ABI,
       functionName: "getProposal",
@@ -90,11 +89,23 @@ export const Projects = () => {
     return data;
   };
 
+  const fundProposal = async (id: bigint) => {
+    const { request } = await publicClient.simulateContract({
+      address: contractAddress,
+      abi: ABI,
+      functionName: "fundProposal",
+      account: address,
+      args: [id],
+      value: parseEther("1"),
+    });
+    await walletClient.writeContract(request);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       const proposalIds = await getAllProposalsIds();
       const proposalsDetails = await Promise.all(
-        proposalIds.map(async (id) => await getProposalDetails(id)),
+        proposalIds.map(async (id) => await getProposalDetails(id))
       );
       setProposals(proposalsDetails);
     };
@@ -127,10 +138,10 @@ export const Projects = () => {
                 </h2>
                 <p>{proposal.description}</p>
                 <button
-                  onClick={contribute}
+                  onClick={() => fundProposal(proposal.id)}
                   className="btn bg-black text-white hover:bg-[#41ff54] hover:text-black"
                 >
-                  Contribute
+                  Contribute 1 NEON
                 </button>
               </div>
             </div>
