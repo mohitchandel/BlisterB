@@ -10,8 +10,6 @@ BlisterB is a decentralized application (DApp) built on the NEON EVM blockchain 
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
 - [Usage](#usage)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Smart Contract Overview
 
